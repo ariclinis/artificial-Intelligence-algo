@@ -10,7 +10,7 @@ public class Graph {
 	private HashMap<String,Vertex> vertices;
 	private HashMap<Integer,Edge> edges;	
 	private ArrayList<VertexSet> vSets;
-	public Graph new_graph;
+	private Graph new_graph;
 	private long expansions;
 	private long generated;
 	private long repeated;
@@ -103,7 +103,7 @@ public class Graph {
 	}
 
 	public Node searchSolution(String initLabel, String goalLabel, Algorithms algID, String province) {
-
+		new_graph = new Graph();
 		new_graph = getNew_graph(initLabel, goalLabel,this.getCitesProvince(province),algID);
 		Node n = new_graph.searchSolution( initLabel, goalLabel, algID);
 
@@ -113,11 +113,6 @@ public class Graph {
 
 	public Node searchSolution(String initLabel, String goalLabel, Algorithms algID, List<String> provinces) {
 
-		/*
-		Fazes o mesmo que fizeste do vértice inicial para os vértices da primeira província
-		depois vais buscar os vértices da segunda província e com dois loops vais juntar todos
-		 vértices da primeira província com os da segunda
-		 */
 		int count_l = 0;
 		new_graph = new Graph();
 		Vertex initV = this.getVertice(initLabel);
@@ -128,20 +123,43 @@ public class Graph {
 		while (count_l < provinces.size()) {
 			HashSet<Vertex> cites = getCitesProvince(provinces.get(count_l));
 
-			Iterator<Vertex> iterator_province = cites.iterator();
 			//Novo grafo
+			if (count_l == 0 ) {
+				for (Vertex v : cites) {
+					String city = v.getLabel();
+					Vertex city_next_v = this.getVertice(city);
+					new_graph.addVertice(city, city_next_v.getLatitude(), city_next_v.getLongitude());
+					new_graph.addEdge(initLabel, city_next_v.getLabel(), searchSolution(initLabel, city_next_v.getLabel(), algID).getPathCost());
+				}
+			}else if(count_l == provinces.size()-1){
+				for (Vertex v : cites) {
+					String city = v.getLabel();
+					Vertex city_next_v = this.getVertice(city);
+					HashSet<Vertex> cites_ant = getCitesProvince(provinces.get(count_l-1));
 
-			while (iterator_province.hasNext()){
-				String city = iterator_province.next().getLabel();
-				Vertex city_next_v = this.getVertice(city);
-				new_graph.addVertice(city,city_next_v.getLatitude(), city_next_v.getLongitude());
-				new_graph.addEdge(initLabel, city_next_v.getLabel(), searchSolution(initLabel, city_next_v.getLabel(), algID).getPathCost());
-				new_graph.addEdge(goalLabel, city_next_v.getLabel(), searchSolution(goalLabel, city_next_v.getLabel(), algID).getPathCost());
+					new_graph.addVertice(city, city_next_v.getLatitude(), city_next_v.getLongitude());
+					new_graph.addEdge(goalLabel, city_next_v.getLabel(), searchSolution(goalLabel, city_next_v.getLabel(), algID).getPathCost());
+					for (Vertex v_ant:cites_ant) {
+						new_graph.addEdge(v_ant.getLabel(), city_next_v.getLabel(), searchSolution(v_ant.getLabel(), city_next_v.getLabel(), algID).getPathCost());
+					}
+
+				}
+			}else{
+				HashSet<Vertex> cites_ant = getCitesProvince(provinces.get(count_l-1));
+				for (Vertex v: cites) {
+					for (Vertex v_ant:cites_ant) {
+						String city = v.getLabel();
+						Vertex city_next_v = this.getVertice(city);
+						new_graph.addVertice(city, city_next_v.getLatitude(), city_next_v.getLongitude());
+						new_graph.addEdge(v_ant.getLabel(), city_next_v.getLabel(), searchSolution(v_ant.getLabel(), city_next_v.getLabel(), algID).getPathCost());
+					}
+				}
 			}
+
 			count_l++;
 		}
 
-		Node n = new_graph.searchSolution( initLabel, goalLabel, algID);
+		Node n = new_graph.searchSolution(initLabel, goalLabel, algID);
 
 		return n;
 	}
@@ -180,15 +198,13 @@ public class Graph {
 	}
 
 
+
 	public void showSolution(Node n) {
-		showSolution(n,this);
-	}
-	public void showSolution(Node n, Graph g) {
 		System.out.println("******************* SOLUTION ********************");
-		System.out.println("Node Expansions: " + g.expansions);
-		System.out.println("Nodes Generated: " + g.generated);
-		System.out.println("State Repetitions: " + g.repeated);
-		System.out.printf("Runtime (ms): %6.3f \n",g.time);
+		System.out.println("Node Expansions: " + this.expansions);
+		System.out.println("Nodes Generated: " + this.generated);
+		System.out.println("State Repetitions: " + this.repeated);
+		System.out.printf("Runtime (ms): %6.3f \n",this.time);
 		Node ni = null;
 		List<Object> solution = n.getPath();
 		double dist = 0;

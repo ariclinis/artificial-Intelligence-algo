@@ -10,6 +10,8 @@ public class main {
     public static void main(String[] args) {
         Graph graph1 = Romenia.defineGraph();
         Node n;
+        graph1.showSets();
+
         List<String> lProvinces= new ArrayList<>();
         lProvinces.add("Dobrogea");
         lProvinces.add("Banat");
