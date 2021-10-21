@@ -2,15 +2,26 @@ import undirectedgraph.*;
 import searchproblem.*;
 import searchalgorithm.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class main {
     public static void main(String[] args) {
         Graph graph1 = Romenia.defineGraph();
-        Graph graph = Romenia.defineNewGraph("Arad", "Bucharest", "Dobrogea", Algorithms.AStarSearch, graph1);
-        graph.showLinks();
-        graph.showSets();
         Node n;
-        n = graph.searchSolution("Arad", "Bucharest", Algorithms.AStarSearch);
-        graph.showSolution(n);
+        List<String> lProvinces= new ArrayList<>();
+        lProvinces.add("Dobrogea");
+        lProvinces.add("Banat");
+        System.out.println("De uma provincia");
+        n = graph1.searchSolution("Arad", "Bucharest", Algorithms.AStarSearch, "Dobrogea");
+
+
+        graph1.showSolution(n);
+        System.out.println("De Varias provincia");
+        n = graph1.searchSolution("Arad", "Bucharest", Algorithms.AStarSearch, lProvinces);
+
+
+        graph1.showSolution(n);
     }
 }

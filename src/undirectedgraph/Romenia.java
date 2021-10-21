@@ -113,7 +113,7 @@ public class Romenia {
         return g;
     }
 
-    public static Graph defineNewGraph(String initLabel, String goalLabel, String province, Algorithms algID, Graph g ) {
+    /*public static Graph defineNewGraph(String initLabel, String goalLabel, String province, Algorithms algID, Graph g ) {
         //State init = new State(this.getVertice(initLabel));
         //State goal = new State(this.getVertice(goalLabel));
         Node n=null;
@@ -164,6 +164,8 @@ public class Romenia {
             }
         }
     }
+
+     */
 
 
 }

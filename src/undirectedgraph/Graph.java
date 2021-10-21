@@ -10,7 +10,7 @@ public class Graph {
 	private HashMap<String,Vertex> vertices;
 	private HashMap<Integer,Edge> edges;	
 	private ArrayList<VertexSet> vSets;
-	
+	public Graph new_graph;
 	private long expansions;
 	private long generated;
 	private long repeated;
@@ -102,10 +102,48 @@ public class Graph {
 		System.out.println("*************************************************");
 	}
 
-	public Node searchSolution(String initLabel, String goalLabel, Algorithms algID, Graph g) {
-		Node n = searchSolution(initLabel,goalLabel,algID);
-		//n.getPath() = g.paths();
-		return null;
+	public Node searchSolution(String initLabel, String goalLabel, Algorithms algID, String province) {
+
+		new_graph = getNew_graph(initLabel, goalLabel,this.getCitesProvince(province),algID);
+		Node n = new_graph.searchSolution( initLabel, goalLabel, algID);
+
+		return n;
+	}
+
+
+	public Node searchSolution(String initLabel, String goalLabel, Algorithms algID, List<String> provinces) {
+
+		/*
+		Fazes o mesmo que fizeste do vértice inicial para os vértices da primeira província
+		depois vais buscar os vértices da segunda província e com dois loops vais juntar todos
+		 vértices da primeira província com os da segunda
+		 */
+		int count_l = 0;
+		new_graph = new Graph();
+		Vertex initV = this.getVertice(initLabel);
+		Vertex goalV = this.getVertice(goalLabel);
+		new_graph.addVertice(initLabel, initV.getLatitude(), initV.getLongitude());
+		new_graph.addVertice(goalLabel, goalV.getLatitude(), goalV.getLongitude());
+
+		while (count_l < provinces.size()) {
+			HashSet<Vertex> cites = getCitesProvince(provinces.get(count_l));
+
+			Iterator<Vertex> iterator_province = cites.iterator();
+			//Novo grafo
+
+			while (iterator_province.hasNext()){
+				String city = iterator_province.next().getLabel();
+				Vertex city_next_v = this.getVertice(city);
+				new_graph.addVertice(city,city_next_v.getLatitude(), city_next_v.getLongitude());
+				new_graph.addEdge(initLabel, city_next_v.getLabel(), searchSolution(initLabel, city_next_v.getLabel(), algID).getPathCost());
+				new_graph.addEdge(goalLabel, city_next_v.getLabel(), searchSolution(goalLabel, city_next_v.getLabel(), algID).getPathCost());
+			}
+			count_l++;
+		}
+
+		Node n = new_graph.searchSolution( initLabel, goalLabel, algID);
+
+		return n;
 	}
 
 	public Node searchSolution(String initLabel, String goalLabel, Algorithms algID) {
@@ -143,11 +181,14 @@ public class Graph {
 
 
 	public void showSolution(Node n) {
+		showSolution(n,this);
+	}
+	public void showSolution(Node n, Graph g) {
 		System.out.println("******************* SOLUTION ********************");
-		System.out.println("Node Expansions: " + this.expansions);
-		System.out.println("Nodes Generated: " + this.generated);
-		System.out.println("State Repetitions: " + this.repeated);
-		System.out.printf("Runtime (ms): %6.3f \n",this.time);
+		System.out.println("Node Expansions: " + g.expansions);
+		System.out.println("Nodes Generated: " + g.generated);
+		System.out.println("State Repetitions: " + g.repeated);
+		System.out.printf("Runtime (ms): %6.3f \n",g.time);
 		Node ni = null;
 		List<Object> solution = n.getPath();
 		double dist = 0;
@@ -178,6 +219,33 @@ public class Graph {
 			return cities;
 	}
 
+	public HashSet<Vertex> getCitesProvinces(List<String> provinces){
+		boolean found = false;
+		int count = this.vSets.size();
+		ArrayList<VertexSet> ite = this.vSets;
+		HashSet<Vertex> cities= new HashSet<>();
+		int i =0;
+		int count_l = 0;
+		Iterator<String> it = provinces.iterator();
+
+		while (count_l < provinces.size()) {
+			while (i < count && !found) {
+				if (this.vSets.get(i).getLabel() == provinces.get(count_l).toString()) {
+					found = true;
+					for (Vertex v : this.vSets.get(i).getVertices()) {
+						cities.add(v);
+					}
+				}
+				i++;
+
+			}
+			found=false;
+			i=0;
+			count_l++;
+		}
+		return cities;
+	}
+
 	public void initVSet(ArrayList<VertexSet> vSets){
 		this.vSets = vSets;
 	}
@@ -185,5 +253,28 @@ public class Graph {
 	public ArrayList<VertexSet> getVSets(){
 		return this.vSets;
 	}
+
+	private Graph getNew_graph(String initLabel, String goalLabel, HashSet<Vertex> cities_province, Algorithms algID){
+		Graph g = this;
+		Vertex initV = g.getVertice(initLabel);
+		Vertex goalV = g.getVertice(goalLabel);
+		HashSet<Vertex> cities_provinces = cities_province;
+		Iterator<Vertex> iterator_province = cities_provinces.iterator();
+		//Novo grafo
+		new_graph = new Graph();
+		new_graph.addVertice(initLabel, initV.getLatitude(), initV.getLongitude());
+		new_graph.addVertice(goalLabel, goalV.getLatitude(), goalV.getLongitude());
+
+		while (iterator_province.hasNext()){
+			String city = iterator_province.next().getLabel();
+			Vertex city_next_v = g.getVertice(city);
+			new_graph.addVertice(city,city_next_v.getLatitude(), city_next_v.getLongitude());
+			new_graph.addEdge(initLabel, city_next_v.getLabel(), searchSolution(initLabel, city_next_v.getLabel(), algID).getPathCost());
+			new_graph.addEdge(goalLabel, city_next_v.getLabel(), searchSolution(goalLabel, city_next_v.getLabel(), algID).getPathCost());
+
+		}
+		return new_graph;
+	}
+
 
 }
