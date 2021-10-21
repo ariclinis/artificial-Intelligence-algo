@@ -43,7 +43,7 @@ public class Graph {
 	
 	public VertexSet getVerticeSet(String setLabel) {
 		for (VertexSet vSet : vSets) {
-			if (vSet.getLabel()==setLabel) 
+			if (vSet.getLabel()==setLabel)
 				return vSet;
 		}
 		return null;
@@ -235,47 +235,11 @@ public class Graph {
 			return cities;
 	}
 
-	public HashSet<Vertex> getCitesProvinces(List<String> provinces){
-		boolean found = false;
-		int count = this.vSets.size();
-		ArrayList<VertexSet> ite = this.vSets;
-		HashSet<Vertex> cities= new HashSet<>();
-		int i =0;
-		int count_l = 0;
-		Iterator<String> it = provinces.iterator();
-
-		while (count_l < provinces.size()) {
-			while (i < count && !found) {
-				if (this.vSets.get(i).getLabel() == provinces.get(count_l).toString()) {
-					found = true;
-					for (Vertex v : this.vSets.get(i).getVertices()) {
-						cities.add(v);
-					}
-				}
-				i++;
-
-			}
-			found=false;
-			i=0;
-			count_l++;
-		}
-		return cities;
-	}
-
-	public void initVSet(ArrayList<VertexSet> vSets){
-		this.vSets = vSets;
-	}
-
-	public ArrayList<VertexSet> getVSets(){
-		return this.vSets;
-	}
-
 	private Graph getNew_graph(String initLabel, String goalLabel, HashSet<Vertex> cities_province, Algorithms algID){
 		Graph g = this;
 		Vertex initV = g.getVertice(initLabel);
 		Vertex goalV = g.getVertice(goalLabel);
-		HashSet<Vertex> cities_provinces = cities_province;
-		Iterator<Vertex> iterator_province = cities_provinces.iterator();
+		Iterator<Vertex> iterator_province = cities_province.iterator();
 		//Novo grafo
 		new_graph = new Graph();
 		new_graph.addVertice(initLabel, initV.getLatitude(), initV.getLongitude());
